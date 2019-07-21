@@ -1,0 +1,46 @@
+version: '2.3'
+services:
+  vpn:
+    build: ./vpn
+    image: registry.janstun.com/library/vpn:sandbox
+    networks:
+      default:
+        aliases:
+          - vpn.sandbox.jst
+    environment:
+      HOSTNAME: vpn.sandbox.jst
+    volumes:
+      - ./.persist/vpn/openvpn:/etc/openvpn
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+
+  proxy:
+    build: ./proxy
+    image: registry.janstun.com/library/proxy:sandbox
+    networks:
+      default:
+        aliases:
+          - proxy.sandbox.jst
+    environment:
+      HOSTNAME: proxy.sandbox.jst
+    volumes:
+      - ./.persist/proxy/openvpn:/etc/openvpn
+      - ./.persist/proxy/squid:/etc/squid
+    dns:
+      - 8.8.8.8
+      - 4.2.2.4
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+
+  node:
+    scale: 3
+    image: debian:latest
+    environment:
+      HOSTNAME: node.sandbox.jst
+
+      HTTP_PROXY: http://proxy.sandbox.jst:3128
+      HTTPS_PROXY: http://proxy.sandbox.jst:3128
