@@ -1,0 +1,32 @@
+all:
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_user: janstun
+    ansible_connection: docker
+  children:
+    vpn:
+      vars:
+        servers:
+          - { name: sxvpn, address: vpn.sandbox.jst, port: 1194 }
+        clients:
+          - nodes
+      hosts:
+        sx-vpn:
+          ansible_host: sandbox_vpn_1
+
+    proxy:
+      vars:
+        vpns:
+          - { server: sxvpn, profile: k8s-cluster }
+      hosts:
+        sx-proxy:
+          ansible_host: sandbox_proxy_1
+
+    nodes:
+      hosts:
+        sx-n1:
+          ansible_host: sandbox_node_1
+        sx-n2:
+          ansible_host: sandbox_node_2
+        sx-n3:
+          ansible_host: sandbox_node_3
