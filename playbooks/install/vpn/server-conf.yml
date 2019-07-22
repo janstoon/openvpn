@@ -1,0 +1,38 @@
+- block:
+    - name: copy certificates and keys
+      shell: "ln -s ca/pki/ca.crt ca/pki/private/ca.key ca/pki/issued/{{ server.name }}.crt ca/pki/private/{{ server.name }}.key ."
+      args:
+        chdir: "/etc/openvpn/server/{{ server.name }}"
+        creates: "{{ server.name }}.crt"
+
+    - name: copy server diffie-hellman parameters
+      shell: "ln ca/pki/dh.pem dh2048.pem"
+      args:
+        chdir: "/etc/openvpn/server/{{ server.name }}"
+        creates: dh2048.pem
+
+    - name: copy default server template
+      shell: "gunzip -c /usr/share/doc/openvpn/examples/sample-config-files/server.conf.gz > {{ server.name }}.conf"
+      args:
+        chdir: "/etc/openvpn/server"
+        creates: "{{ server.name }}.conf"
+
+    - name: setup server configuration
+      lineinfile:
+        path: "/etc/openvpn/server/{{ server.name }}.conf"
+        regexp: "{{ line.regexp }}"
+        line: "{{ line.line }}"
+      loop:
+        - { regexp: '^proto\s', line: 'proto tcp' }
+        - { regexp: 'push "redirect-gateway def1 bypass-dhcp"', line: 'push "redirect-gateway def1 bypass-dhcp"' }
+        - { regexp: 'push "dhcp-option DNS 8.8.8.8"', line: 'push "dhcp-option DNS 8.8.8.8"' }
+        - { regexp: 'explicit-exit-notify', line: '# explicit-exit-notify 1' }
+        - { regexp: 'user', line: 'user nobody' }
+        - { regexp: 'group', line: 'group nogroup' }
+        - { regexp: 'ca\s+[\w\/]+\.crt', line: 'ca {{ server.name }}/ca.crt'  }
+        - { regexp: 'cert\s+[\w\/]+\.crt', line: 'cert {{ server.name }}/{{ server.name }}.crt' }
+        - { regexp: 'dh\s+[\w\/]+\.pem', line: 'dh {{ server.name }}/dh2048.pem' }
+        - { regexp: 'key\s+[\w\/]+\.key', line: 'key {{ server.name }}/{{ server.name }}.key # This file should be kept secret' }
+        - { regexp: 'tls-auth\s+[\w\/]+\.key', line: 'tls-auth {{ server.name }}/ta.key 0 # This file is secret' }
+      loop_control:
+        loop_var: line

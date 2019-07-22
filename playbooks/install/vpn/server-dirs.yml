@@ -1,0 +1,16 @@
+- block:
+    - name: create server aggregate directory
+      file:
+        path: "/etc/openvpn/server/{{ server.name }}"
+        state: directory
+
+    - name: create clients profiles directory
+      file:
+        path: "/etc/openvpn/server/{{ server.name }}/clients"
+        state: directory
+
+    - name: create easy-rsa dir
+      shell: make-cadir ca
+      args:
+        chdir: "/etc/openvpn/server/{{ server.name }}"
+        creates: ca

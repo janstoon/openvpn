@@ -1,0 +1,18 @@
+- block:
+  - name: enable & restart openvpn client service on systemd
+    service:
+      name: "openvpn-client@{{ vpn.server }}-{{ vpn.profile }}"
+      enabled: yes
+      state: restarted
+  rescue:
+    - name: copy client configuration
+      copy:
+        remote_src: yes
+        src: "/etc/openvpn/client/{{ vpn.server }}-{{ vpn.profile }}.conf"
+        dest: "/etc/openvpn/{{ vpn.server }}-{{ vpn.profile }}.conf"
+
+    - name: enable & restart openvpn client on init.d
+      service:
+        name: "openvpn"
+        enabled: yes
+        state: restarted

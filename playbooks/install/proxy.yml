@@ -1,0 +1,34 @@
+- hosts: proxy
+  become: yes
+  tasks:
+    - name: install openvpn client, squid
+      apt:
+        update_cache: yes
+        name:
+          - openvpn
+          - squid
+
+    - name: setup openvpn client connection
+      copy:
+        src: "{{ ovpn_dir }}/server/{{ vpn.server }}/clients/{{ vpn.profile }}.ovpn"
+        dest: "/etc/openvpn/client/{{ vpn.server }}-{{ vpn.profile }}.conf"
+      loop: "{{ vpns }}"
+      loop_control:
+        loop_var: vpn
+
+    - name: enable & start openvpn client service
+      include_tasks: proxy/client-service.yml
+      loop: "{{ vpns }}"
+      loop_control:
+        loop_var: vpn
+
+    - name: setup squid
+      copy:
+        src: "../../../squid/squid.conf"
+        dest: "/etc/squid/squid.conf"
+
+    - name: enable & start squid service
+      service:
+        name: squid
+        enabled: yes
+        state: restarted

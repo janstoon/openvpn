@@ -1,0 +1,32 @@
+- block:
+    - name: enable & restart openvpn server service on systemd
+      service:
+        name: "openvpn-server@{{ server.name }}"
+        enabled: yes
+        state: restarted
+  rescue:
+    - name: copy server configuration
+      copy:
+        remote_src: yes
+        src: "/etc/openvpn/server/{{ server.name }}.conf"
+        dest: "/etc/openvpn/{{ server.name }}.conf"
+
+    - name: setup server configuration
+      lineinfile:
+        path: "/etc/openvpn/{{ server.name }}.conf"
+        regexp: "{{ line.regexp }}"
+        line: "{{ line.line }}"
+      loop:
+        - { regexp: 'ca\s+[\w\/]+\.crt', line: 'ca server/{{ server.name }}/ca.crt'  }
+        - { regexp: 'cert\s+[\w\/]+\.crt', line: 'cert server/{{ server.name }}/{{ server.name }}.crt' }
+        - { regexp: 'dh\s+[\w\/]+\.pem', line: 'dh server/{{ server.name }}/dh2048.pem' }
+        - { regexp: 'key\s+[\w\/]+\.key', line: 'key server/{{ server.name }}/{{ server.name }}.key # This file should be kept secret' }
+        - { regexp: 'tls-auth\s+[\w\/]+\.key', line: 'tls-auth server/{{ server.name }}/ta.key 0 # This file is secret' }
+      loop_control:
+        loop_var: line
+
+    - name: enable & restart openvpn service on init.d
+      service:
+        name: "openvpn"
+        enabled: yes
+        state: restarted

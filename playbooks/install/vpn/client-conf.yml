@@ -1,0 +1,49 @@
+- block:
+    - name: create client profile .ovpn files
+      shell: |
+        cp /usr/share/doc/openvpn/examples/sample-config-files/client.conf '{{ serverclient[1] }}.ovpn'
+
+        echo "key-direction 1" >> '{{ serverclient[1] }}.ovpn'
+
+        echo "script-security 2" >> '{{ serverclient[1] }}.ovpn'
+        echo "up /etc/openvpn/update-resolv-conf" >> '{{ serverclient[1] }}.ovpn'
+        echo "down /etc/openvpn/update-resolv-conf" >>'{{ serverclient[1] }}.ovpn'
+
+        echo "<ca>" >> '{{ serverclient[1] }}.ovpn'
+        sed -n '/BEGIN CERTIFICATE/,/END CERTIFICATE/p' < ../ca.crt >> '{{ serverclient[1] }}.ovpn'
+        echo "</ca>" >> '{{ serverclient[1] }}.ovpn'
+
+        echo "<cert>" >> '{{ serverclient[1] }}.ovpn'
+        sed -n '/BEGIN CERTIFICATE/,/END CERTIFICATE/p' < '../ca/pki/issued/{{ serverclient[1] }}.crt' >> '{{ serverclient[1] }}.ovpn'
+        echo "</cert>" >> '{{ serverclient[1] }}.ovpn'
+
+        echo "<key>" >> '{{ serverclient[1] }}.ovpn'
+        sed -n '/BEGIN PRIVATE KEY/,/END PRIVATE KEY/p' < '../ca/pki/private/{{ serverclient[1] }}.key' >> '{{ serverclient[1] }}.ovpn'
+        echo "</key>" >> '{{ serverclient[1] }}.ovpn'
+
+        echo "<tls-auth>" >> '{{ serverclient[1] }}.ovpn'
+        sed -n '/BEGIN OpenVPN Static key/,/END OpenVPN Static key/p' < '../ta.key' >> '{{ serverclient[1] }}.ovpn'
+        echo "</tls-auth>" >> '{{ serverclient[1] }}.ovpn'
+      args:
+        chdir: "/etc/openvpn/server/{{ serverclient[0].name }}/clients"
+        creates: "{{ serverclient[1] }}.ovpn"
+
+    - name: edit remote in client profile .ovpn files
+      lineinfile:
+        path: "/etc/openvpn/server/{{ serverclient[0].name }}/clients/{{ serverclient[1] }}.ovpn"
+        regexp: '^remote\s'
+        line: "remote {{ serverclient[0].address }} {{ serverclient[0].port }}"
+
+    - name: edit connection options in client profile .ovpn files
+      lineinfile:
+        path: "/etc/openvpn/server/{{ serverclient[0].name }}/clients/{{ serverclient[1] }}.ovpn"
+        regexp: "{{ line.regexp }}"
+        line: "{{ line.line }}"
+      loop:
+        - { regexp: '^proto\s', line: 'proto tcp' }
+        - { regexp: 'mute-replay-warnings', line: 'mute-replay-warnings' }
+        - { regexp: 'ca\s+\w+\.crt', line: '# ca ca.crt' }
+        - { regexp: 'cert\s+\w+\.crt', line: '# cert client.crt' }
+        - { regexp: 'key\s\w+\.key', line: '# key client.key' }
+      loop_control:
+        loop_var: line

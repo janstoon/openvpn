@@ -1,0 +1,20 @@
+- block:
+    - name: create vars file if missing
+      shell: cp vars.example vars
+      args:
+        chdir: "/etc/openvpn/server/{{ server.name }}/ca"
+        creates: vars
+
+    - name: edit easy-rsa vars
+      lineinfile:
+        path: "/etc/openvpn/server/{{ server.name }}/ca/vars"
+        regexp: "{{ line.regexp }}"
+        line: "{{ line.line }}"
+      loop:
+        - { regexp: "EASYRSA_REQ_COUNTRY", line: "set_var EASYRSA_REQ_COUNTRY	\"US\"" }
+        - { regexp: "EASYRSA_REQ_PROVINCE", line: "set_var EASYRSA_REQ_PROVINCE	\"California\"" }
+        - { regexp: "EASYRSA_REQ_CITY", line: "set_var EASYRSA_REQ_CITY	\"San Francisco\"" }
+        - { regexp: "EASYRSA_REQ_ORG", line: "set_var EASYRSA_REQ_ORG	\"Copyleft Certificate Co\"" }
+        - { regexp: "EASYRSA_REQ_EMAIL", line: "set_var EASYRSA_REQ_EMAIL	\"me@example.net\"" }
+      loop_control:
+        loop_var: line

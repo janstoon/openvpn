@@ -3,6 +3,7 @@ all:
     ansible_python_interpreter: /usr/bin/python3
     ansible_user: janstun
     ansible_connection: docker
+    ovpn_dir: .persist/ovpn
   children:
     vpn:
       vars:

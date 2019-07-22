@@ -1,0 +1,41 @@
+- block:
+    - name: initialize pki
+      shell: ./easyrsa init-pki
+      args:
+        chdir: "/etc/openvpn/server/{{ server.name }}/ca"
+        creates: pki
+
+    - name: generate server root certificates
+      expect:
+        command: ./easyrsa build-ca nopass
+        chdir: "/etc/openvpn/server/{{ server.name }}/ca"
+        creates: pki/ca.crt
+        responses:
+          "Common Name": "{{ server.name }}"
+
+    - name: generate server certificates
+      shell: "./easyrsa build-server-full {{ server.name }} nopass"
+      args:
+        chdir: "/etc/openvpn/server/{{ server.name }}/ca"
+        creates: "pki/issued/{{ server.name }}.crt"
+
+    - name: generate server diffie-hellman parameters
+      shell: ./easyrsa gen-dh
+      args:
+        chdir: "/etc/openvpn/server/{{ server.name }}/ca"
+        creates: pki/dh.pem
+
+    - name: generate server secret key
+      shell: openvpn --genkey --secret ta.key
+      args:
+        chdir: "/etc/openvpn/server/{{ server.name }}"
+        creates: ta.key
+
+    - name: generate client certificates
+      shell: "./easyrsa build-client-full {{ client }} nopass"
+      args:
+        chdir: "/etc/openvpn/server/{{ server.name }}/ca"
+        creates: "pki/issued/{{ client }}.crt"
+      loop: "{{ clients }}"
+      loop_control:
+        loop_var: client

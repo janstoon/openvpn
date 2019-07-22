@@ -1,0 +1,34 @@
+all:
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_user: janstun
+    ovpn_dir: .persist/ovpn
+  children:
+    vpn:
+      vars:
+        servers:
+          - { name: wonderland, address: 1.2.3.4, port: 1194 }
+        clients:
+          - alice
+      hosts:
+        wonderland:
+          ansible_host: 1.2.3.4
+
+    proxy:
+      vars:
+        vpns:
+          - { server: wonderland, profile: alice }
+      hosts:
+        proxy.example.local:
+          ansible_host: 172.16.0.20
+
+    nodes:
+      hosts:
+        staging:
+          ansible_host: 172.16.0.50
+        alpha:
+          ansible_host: 172.16.0.51
+        beta:
+          ansible_host: 172.16.0.52
+        rc:
+          ansible_host: 172.16.0.53

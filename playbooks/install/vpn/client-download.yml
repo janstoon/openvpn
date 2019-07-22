@@ -1,0 +1,16 @@
+- block:
+    - name: create servers directories on local
+      become: no
+      file:
+        path: "{{ ovpn_dir }}/server/{{ server.name }}/clients"
+        state: directory
+      delegate_to: localhost
+
+    - name: download client profile connection files
+      fetch:
+        src: "/etc/openvpn/server/{{ server.name }}/clients/{{ client }}.ovpn"
+        dest: "{{ ovpn_dir }}/server/{{ server.name }}/clients/{{ client }}.ovpn"
+        flat: yes
+      loop: "{{ clients }}"
+      loop_control:
+        loop_var: client
