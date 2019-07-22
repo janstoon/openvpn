@@ -3,20 +3,27 @@
   tasks:
     - name: global http proxy environment
       block:
-        - name: export HTTP_PROXY
+        - name: profile proxy env
           lineinfile:
             path: /etc/profile.d/http_proxy.sh
-            line: 'export HTTP_PROXY={{ http_proxy }}'
+            regexp: "{{ line.regexp }}"
+            line: "{{ line.line }}"
+            create: yes
+          loop:
+            - { regexp: 'HTTP_PROXY=', line: 'export HTTP_PROXY={{ http_proxy }}' }
+            - { regexp: 'HTTPS_PROXY=', line: 'export HTTPS_PROXY={{ http_proxy }}' }
+            - { regexp: 'NO_PROXY=', line: 'export NO_PROXY={{ no_proxy }}' }
+          loop_control:
+            loop_var: line
+
+        - name: apt proxy
+          lineinfile:
+            path: /etc/apt/apt.conf.d/99HttpProxy
+            line: 'Acquire::http::Proxy "{{ http_proxy }}";'
             create: yes
 
-        - name: export HTTPS_PROXY
+        - name: wget proxy
           lineinfile:
-            path: /etc/profile.d/http_proxy.sh
-            line: 'export HTTPS_PROXY={{ http_proxy }}'
-            create: yes
-
-        - name: export NO_PROXY
-          lineinfile:
-            path: /etc/profile.d/http_proxy.sh
-            line: 'export NO_PROXY={{ no_proxy }}'
+            path: /etc/wgetrc
+            line: 'http_proxy = {{ http_proxy }}'
             create: yes
