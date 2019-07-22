@@ -1,7 +1,7 @@
 # OpenVPN and HTTP Proxy
 This repository consists of Ansible playbooks realizing these openvpn scenarios:
-1. Setup OpenVPN server
-2. Setup HTTP Proxy and forward traffic to an OpenVPN server
+1. Setup OpenVPN server on Debian
+2. Setup HTTP Proxy and forward traffic to an OpenVPN server on Debian
 
 # Configure inventory (hosts)
 
