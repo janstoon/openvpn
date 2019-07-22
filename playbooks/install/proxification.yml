@@ -19,11 +19,26 @@
         - name: apt proxy
           lineinfile:
             path: /etc/apt/apt.conf.d/99HttpProxy
-            line: 'Acquire::http::Proxy "{{ http_proxy }}";'
+            regexp: "{{ line.regexp }}"
+            line: "{{ line.line }}"
             create: yes
+          loop:
+            - { regexp: '^Acquire::http::Proxy', line: 'Acquire::http::Proxy "{{ http_proxy }}";' }
+            - { regexp: '^Acquire::https::Proxy', line: 'Acquire::https::Proxy "{{ http_proxy }}";' }
+          loop_control:
+            loop_var: line
 
         - name: wget proxy
           lineinfile:
             path: /etc/wgetrc
-            line: 'http_proxy = {{ http_proxy }}'
+            regexp: "{{ line.regexp }}"
+            line: "{{ line.line }}"
             create: yes
+          loop:
+            - { regexp: '^http_proxy', line: 'http_proxy = {{ http_proxy }}' }
+            - { regexp: '^https_proxy', line: 'https_proxy = {{ http_proxy }}' }
+            - { regexp: '^ftp_proxy', line: 'ftp_proxy = {{ http_proxy }}' }
+            - { regexp: '^no_proxy', line: 'no_proxy = {{ no_proxy }}' }
+          loop_control:
+            loop_var: line
+
