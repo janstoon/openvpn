@@ -1,2 +1,3 @@
 - import_playbook: ./playbooks/install/vpn.yml
 - import_playbook: ./playbooks/install/proxy.yml
+- import_playbook: ./playbooks/install/proxification.yml

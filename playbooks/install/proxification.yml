@@ -1,0 +1,22 @@
+- hosts: proxifiables
+  become: yes
+  tasks:
+    - name: global http proxy environment
+      block:
+        - name: export HTTP_PROXY
+          lineinfile:
+            path: /etc/profile.d/http_proxy.sh
+            line: 'export HTTP_PROXY={{ http_proxy }}'
+            create: yes
+
+        - name: export HTTPS_PROXY
+          lineinfile:
+            path: /etc/profile.d/http_proxy.sh
+            line: 'export HTTPS_PROXY={{ http_proxy }}'
+            create: yes
+
+        - name: export NO_PROXY
+          lineinfile:
+            path: /etc/profile.d/http_proxy.sh
+            line: 'export NO_PROXY={{ no_proxy }}'
+            create: yes

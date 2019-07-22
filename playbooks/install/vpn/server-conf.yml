@@ -23,7 +23,7 @@
         regexp: "{{ line.regexp }}"
         line: "{{ line.line }}"
       loop:
-        - { regexp: '^proto\s', line: 'proto tcp' }
+        - { regexp: '^proto\s', line: 'proto {{ server.proto }}' }
         - { regexp: 'push "redirect-gateway def1 bypass-dhcp"', line: 'push "redirect-gateway def1 bypass-dhcp"' }
         - { regexp: 'push "dhcp-option DNS 8.8.8.8"', line: 'push "dhcp-option DNS 8.8.8.8"' }
         - { regexp: 'explicit-exit-notify', line: '# explicit-exit-notify 1' }

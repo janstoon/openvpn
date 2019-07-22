@@ -7,7 +7,7 @@ all:
     vpn:
       vars:
         servers:
-          - { name: wonderland, address: 1.2.3.4, port: 1194 }
+          - { name: wonderland, address: 1.2.3.4, proto: udp, port: 1194 }
         clients:
           - alice
       hosts:
@@ -32,3 +32,10 @@ all:
           ansible_host: 172.16.0.52
         rc:
           ansible_host: 172.16.0.53
+
+    proxifiables:
+      vars:
+        http_proxy: http://proxy.example.local:3128
+        no_proxy: .example.jst
+      children:
+        nodes:

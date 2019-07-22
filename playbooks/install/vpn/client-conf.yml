@@ -40,7 +40,7 @@
         regexp: "{{ line.regexp }}"
         line: "{{ line.line }}"
       loop:
-        - { regexp: '^proto\s', line: 'proto tcp' }
+        - { regexp: '^proto\s', line: 'proto {{ serverclient[0].proto }}' }
         - { regexp: 'mute-replay-warnings', line: 'mute-replay-warnings' }
         - { regexp: 'ca\s+\w+\.crt', line: '# ca ca.crt' }
         - { regexp: 'cert\s+\w+\.crt', line: '# cert client.crt' }

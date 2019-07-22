@@ -8,7 +8,7 @@ all:
     vpn:
       vars:
         servers:
-          - { name: sxvpn, address: vpn.sandbox.jst, port: 1194 }
+          - { name: sxvpn, address: vpn.sandbox.jst, proto: tcp, port: 1194 }
         clients:
           - nodes
       hosts:
@@ -31,3 +31,10 @@ all:
           ansible_host: sandbox_node_2
         sx-n3:
           ansible_host: sandbox_node_3
+
+    proxifiables:
+      vars:
+        http_proxy: http://proxy.sandbox.jst:3128
+        no_proxy: .sandbox.jst
+      children:
+        nodes:
