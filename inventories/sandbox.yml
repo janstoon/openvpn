@@ -18,7 +18,7 @@ all:
     proxy:
       vars:
         vpns:
-          - { server: sxvpn, profile: k8s-cluster }
+          - { server: sxvpn, profile: nodes }
       hosts:
         sx-proxy:
           ansible_host: sandbox_proxy_1
